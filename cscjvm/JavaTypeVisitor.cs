@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.CSharp.Resolver;
-using System.Collections.Generic;
-using System.Linq;
 using ICSharpCode.NRefactory.Semantics;
 
 namespace cscjvm

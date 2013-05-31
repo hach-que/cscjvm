@@ -38,7 +38,6 @@
     <Compile Include="io\PrintStream.cs" />
     <Compile Include="JavaStubAttribute.cs" />
     <Compile Include="lang\System.cs" />
-    <Compile Include="JavaLink.cs" />
     <Compile Include="JavaFieldAttribute.cs" />
     <Compile Include="JavaIgnoreAttribute.cs" />
     <Compile Include="EntryPointAttribute.cs" />

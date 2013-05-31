@@ -42,8 +42,6 @@ namespace cscjvm
 
         public static void Main(string[] args)
         {
-            var link = new JavaLink();
-
             // Parse options.
             string jasminJar = null;
             string outputJar = null;

@@ -1,6 +1,6 @@
 using System.Text;
-using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.NRefactory.CSharp;
+using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.NRefactory.TypeSystem.Implementation;
 
 namespace cscjvm

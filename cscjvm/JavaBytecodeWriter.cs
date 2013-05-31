@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using ICSharpCode.NRefactory.TypeSystem;
-using ICSharpCode.NRefactory.CSharp.Resolver;
-using ICSharpCode.NRefactory.Semantics;
 
 namespace cscjvm
 {
