@@ -39,10 +39,17 @@ namespace cscjvm
             if (resolve is MethodGroupResolveResult)
             {
                 var methodResolve = resolve as MethodGroupResolveResult;
-                var method = methodResolve.Methods.First(x => x.Name == methodResolve.MethodName);
-                this.m_Writer.Write(JavaInvoke.DetermineInvocationMethod(method));
-                this.m_Writer.Write(' ');
-                this.m_Writer.WriteLine(JavaSignature.CreateMethodSignature(method));
+                if (!methodResolve.Methods.Any(x => x.Name == methodResolve.MethodName))
+                {
+                    // FIXME: Extension methods!
+                }
+                else
+                {
+                    var method = methodResolve.Methods.First(x => x.Name == methodResolve.MethodName);
+                    this.m_Writer.Write(JavaInvoke.DetermineInvocationMethod(method));
+                    this.m_Writer.Write(' ');
+                    this.m_Writer.WriteLine(JavaSignature.CreateMethodSignature(method));
+                }
             }
             else
                 throw new NotSupportedException();
@@ -83,6 +90,10 @@ namespace cscjvm
                 if (memberResolve.TargetResult is TypeResolveResult)
                 {
                     this.m_BytecodeWriter.MemberGetStatic(memberResolve.Member);
+                }
+                else if (memberResolve.TargetResult is LocalResolveResult)
+                {
+                    // FIXME: Accessing members of local variables.
                 }
                 else
                     throw new NotSupportedException();
@@ -134,7 +145,8 @@ namespace cscjvm
             if (resolve is TypeResolveResult ||
                 resolve is ConstantResolveResult ||
                 resolve is LocalResolveResult ||
-                resolve is OperatorResolveResult)
+                resolve is OperatorResolveResult ||
+                resolve is CSharpInvocationResolveResult)
             {
                 if (this.m_Locals.ContainsKey(variableInitializer.Name))
                 {
@@ -181,6 +193,18 @@ namespace cscjvm
                         this.m_BytecodeWriter.ReferenceLoad(this.m_Locals[identifierExpression.Identifier]);
                 }
             }
+            else if (resolve is MemberResolveResult)
+            {
+                // FIXME: Do something here.
+            }
+            else if (resolve is UnknownIdentifierResolveResult)
+            {
+                // FIXME: Do something here.
+            }
+            else if (resolve is MethodGroupResolveResult)
+            {
+                // FIXME: Do something here.
+            }
             else if (resolve is NamespaceResolveResult)
             {
             }
@@ -196,18 +220,8 @@ namespace cscjvm
             var right = binaryOperatorExpression.Right;
             var resolveLeft = this.m_Resolver.Resolve(left);
             var resolveRight = this.m_Resolver.Resolve(right);
-            IType leftType = null, rightType = null;
-
-            if (resolveLeft is TypeResolveResult ||
-                resolveLeft is ConstantResolveResult ||
-                resolveLeft is LocalResolveResult ||
-                resolveLeft is OperatorResolveResult)
-                leftType = resolveLeft.Type;
-            if (resolveRight is TypeResolveResult ||
-                resolveRight is ConstantResolveResult ||
-                resolveRight is LocalResolveResult ||
-                resolveRight is OperatorResolveResult)
-                rightType = resolveRight.Type;
+            var leftType = resolveLeft.Type;
+            var rightType = resolveRight.Type;
 
             if (leftType != null && rightType != null)
             {

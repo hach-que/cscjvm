@@ -19,7 +19,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <ConsolePause>false</ConsolePause>
-    <Commandlineparameters>--jasmin=/home/james/Downloads/jasmin-2.4/jasmin.jar --output=test.jar Example.cs</Commandlineparameters>
+    <Commandlineparameters>--jasmin=/home/james/Downloads/jasmin-2.4/jasmin.jar /noconfig /debug:full /debug+ /optimize- /out:/home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/obj/Debug/Tychaia.Globals.jar /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/FilteredConsole.cs /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/FilteredFeatures.cs /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/Settings.cs /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/Properties/AssemblyInfo.cs /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/TemporaryCrapBecauseIDidNotReallyDesignThingsVeryWell.cs /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/IoC.cs /home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/ResourceHelper.cs /target:library /define:"DEBUG;PLATFORM_UNKNOWN" /reference:/usr/lib/mono/4.0/System.dll /reference:/usr/lib/mono/4.0/System.Drawing.dll /reference:/home/james/Projects/Redpoint/Tychaia/Tychaia.Globals/../Libraries/Ninject/Ninject.dll /reference:/usr/lib/mono/4.0/System.Core.dll /warn:4</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <Optimize>true</Optimize>

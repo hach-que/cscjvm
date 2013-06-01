@@ -14,46 +14,55 @@ namespace cscjvm
 {
     class MainClass
     {
-        static Lazy<IList<IUnresolvedAssembly>> builtInLibs = new Lazy<IList<IUnresolvedAssembly>>(
-            delegate {
-            Assembly[] assemblies = {
-                typeof(object).Assembly, // mscorlib
-                //typeof(Uri).Assembly, // System.dll
-                typeof(System.Linq.Enumerable).Assembly, // System.Core.dll
-                //                  typeof(System.Xml.XmlDocument).Assembly, // System.Xml.dll
-                //                  typeof(System.Drawing.Bitmap).Assembly, // System.Drawing.dll
-                //                  typeof(Form).Assembly, // System.Windows.Forms.dll
-                typeof(ICSharpCode.NRefactory.TypeSystem.IProjectContent).Assembly,
-                typeof(java.io.PrintStream).Assembly
-            };
-            IUnresolvedAssembly[] projectContents = new IUnresolvedAssembly[assemblies.Length];
-            Stopwatch total = Stopwatch.StartNew();
-            Parallel.For(
-                0, assemblies.Length,
-                delegate (int i) {
-                Stopwatch w = Stopwatch.StartNew();
-                CecilLoader loader = new CecilLoader();
-                projectContents[i] = loader.LoadAssemblyFile(assemblies[i].Location);
-                Debug.WriteLine(Path.GetFileName(assemblies[i].Location) + ": " + w.Elapsed);
-            });
-            Debug.WriteLine("Total: " + total.Elapsed);
-            return projectContents;
-        });
+        private static IEnumerable<IUnresolvedAssembly> GetProjectReferences(List<string> explicitReferences)
+        {
+            var loader = new CecilLoader();
+            yield return loader.LoadAssemblyFile(typeof(object).Assembly.Location);
+            foreach (var reference in explicitReferences)
+                yield return loader.LoadAssemblyFile(reference);
+        }
 
         public static void Main(string[] args)
         {
             // Parse options.
             string jasminJar = null;
             string outputJar = null;
+            bool noConfig;
+            string target;
+            string debugLevel;
+            bool debug;
+            bool optimize;
+            string define;
+            List<string> reference = new List<string>();
+            string warnLevel;
             List<string> files;
             var options = new OptionSet()
             {
                 { "jasmin=", "Path to Jasmin JAR", x => jasminJar = x },
-                { "output=", "The resulting JAR to create", x => outputJar = x }
+                { "out=", "The resulting JAR to create", x => outputJar = x },
+                { "noconfig", "", x => noConfig = true },
+                { "target=", "", x => target = x },
+                { "debug", "", x => debugLevel = x },
+                { "debug+", "", x => debug = true },
+                { "optimize+", "", x => optimize = true },
+                { "debug-", "", x => debug = false },
+                { "optimize-", "", x => optimize = false },
+                { "define", "", x => define = x },
+                { "reference:", "", reference.Add },
+                { "warn", "", x => warnLevel = x },
             };
             try
             {
                 files = options.Parse(args);
+                if (files.Count == 1 && files[0][0] == '@')
+                {
+                    // Read command line from file.
+                    using (var reader = new StreamReader(files[0].Substring(1)))
+                    {
+                        //Console.WriteLine(reader.ReadToEnd());
+                        files = options.Parse(reader.ReadToEnd().Split(' '));
+                    }
+                }
             }
             catch (OptionException ex)
             {
@@ -63,8 +72,24 @@ namespace cscjvm
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(jasminJar))
+            {
+                Console.WriteLine("Defaulting Jasmin JAR path to JASMIN_JAR environment variable.");
+                jasminJar = Environment.GetEnvironmentVariable("JASMIN_JAR");
+                if (string.IsNullOrWhiteSpace(jasminJar))
+                {
+                    Console.WriteLine("Jasmin JAR path must be set.");
+                    return;
+                }
+            }
+
             Console.WriteLine("C# to JVM Compiler");
             Console.WriteLine("Using Jasmin at: " + jasminJar);
+
+            foreach (var arg in args)
+            {
+                Console.WriteLine("argument: " + arg);
+            }
             
             IProjectContent project = new CSharpProjectContent();
 
@@ -81,14 +106,14 @@ namespace cscjvm
             }
 
             Console.WriteLine("Creating references...");
-            project = project.AddAssemblyReferences(builtInLibs.Value);
+            project = project.AddAssemblyReferences(GetProjectReferences(reference));
             foreach (var tree in trees)
             {
                 project = project.AddOrUpdateFiles(tree.ToTypeSystem());
             }
 
             Console.WriteLine("Emitting Jasmin assembly...");
-            var output = new DirectoryInfo(Environment.CurrentDirectory).CreateSubdirectory("output");
+            var output = new DirectoryInfo(Environment.CurrentDirectory).CreateSubdirectory("obj");
             var sources = new List<string>();
             string entryPoint = null;
             foreach (var tree in trees)
